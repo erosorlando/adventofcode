@@ -15,15 +15,15 @@ do
   if [[ "$line1" == "0" ]]; then continue; fi
   if [[ "$line2" == "0" ]]; then continue; fi
   sumcurrent=$(expr $line1 + $line2 + $line3)
-
+  
   echo "prev: $sumprevious"
   echo "curr: $sumcurrent
   if [[ "$sumcurrent" -gt "$sumprevious" ]]; then
     echo "$sumcurrent maggiore di $sumprevious"
     let counter++
   fi
+  
+  sumprevious=$sumcurrent
+done < $input
 
-  sumprevious="$sumcurrent"
-done < "$input"
-
-echo "$counter"
+echo $counter
