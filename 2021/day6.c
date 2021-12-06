@@ -1,17 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define MAX (990)
-#define MAXLINE (500)
-
-int max=0;
-
-struct line{
-	int x1;
-	int y1;
-	int x2;
-	int y2;
-};
+#define MAX (1000000)
+#define DAYS (80)
 
 char* replaceWord(const char* s, const char* oldW,
                   const char* newW)
@@ -75,155 +66,55 @@ int split (const char *txt, char delim, char ***tokens)
     return count;
 }
 
-void readMatrix(FILE* filePointer,struct line* input){
-   int bufferLength = 255;
+int readInput(FILE* filePointer,int* input){
+   int bufferLength = 1000;
    char buffer[bufferLength];
    char **numbers;
    int i=0;
    
-   while(fgets(buffer, bufferLength, filePointer)) {
-
-      char from[] = " -> ";
-      char to[] = ",";
-	  char *out1=replaceWord(buffer, from, to);
-	  split (out1, ',', &numbers);
-	  input[i].x1=atoi(numbers[1]);
-	  input[i].y1=atoi(numbers[0]);
-	  input[i].x2=atoi(numbers[3]);
-	  input[i].y2=atoi(numbers[2]);
-	  i++;
+   fgets(buffer, bufferLength, filePointer);
+   int nFisches=split (buffer, ',', &numbers);
+   for (int i=0; i<nFisches; i++){
+	input[i]=atoi(numbers[i]);
    }
+   
+   return nFisches;
 }
 
-void printInput(struct line* input){
-	for(int i=0; i<MAXLINE; i++)
-	   printf("line %d: x1=%d,y1=%d x2=%d,y2=%d\n",i,input[i].x1,
-				input[i].y1,input[i].x2,input[i].y2);
-}
-
-void printMatrix(int cartesian[MAX][MAX]){
-	for(int i=0; i<MAX; i++){
-		for (int j=0; j<MAX; j++)
-			printf("%d ",cartesian[i][j]);
-		printf("\n\n");
+void printInput(int* input, int nFisches){
+	for (int i=0; i<nFisches; i++){
+		printf("pesce: %d\t",input[i]);
 	}
 }
 
-void printMatrixRox(int cartesian[MAX][MAX], int row){
-	printf("Row %d\n",row);
-	for (int j=0; j<MAX; j++)
-		printf("%d ",cartesian[row][j]);
-	
-	printf("\n");
-}
-
-void fillMatrixHV(struct line* input, int cartesian[MAX][MAX]){
-	for(int i=0; i<MAXLINE; i++){
-		if(input[i].x1!=input[i].x2 && 
-			input[i].y1!=input[i].y2) continue;
-		
-		if(input[i].x1==input[i].x2 && 
-			input[i].y1==input[i].y2){
-				cartesian[input[i].x1][input[i].y1]++;
-				continue;
+void countFishes(int* input,int* nFisches){
+	int currentFishes=(*nFisches);
+	for (int i=0; i<currentFishes; i++) {
+		if(input[i]==-1) break;
+		if(input[i]==0){
+			input[i]=6;
+			input[(*nFisches)++]=8;
 		}
-			
-		if (input[i].x1==input[i].x2)
-		{
-			if(input[i].y1<input[i].y2)
-				for(int j=input[i].y1;j<=input[i].y2; j++){
-					cartesian[input[i].x1][j]++;
-					if (max<cartesian[input[i].x1][j])
-						max = cartesian[input[i].x1][j];
-				}
-			else
-				for(int j=input[i].y2;j<=input[i].y1; j++){
-					cartesian[input[i].x1][j]++;
-					if (max<cartesian[input[i].x1][j])
-						max = cartesian[input[i].x1][j];
-				}
-		}
-		if (input[i].y1==input[i].y2)
-		{
-			if(input[i].x1<input[i].x2)
-				for(int j=input[i].x1;j<=input[i].x2; j++){
-					cartesian[j][input[i].y1]++;
-					if (max<cartesian[j][input[i].y1])
-						max = cartesian[j][input[i].y1];
-				}
-			else
-				for(int j=input[i].x2;j<=input[i].x1; j++){
-					cartesian[j][input[i].y1]++;
-					if (max<cartesian[j][input[i].y1])
-						max = cartesian[j][input[i].y1];
-				}
-		}
+		else input[i]--;
 	}
 }
 
-void fillMatrixD(struct line* input, int cartesian[MAX][MAX]){
-	for(int i=0; i<MAXLINE; i++){
-		if(input[i].x1==input[i].x2 || 
-			input[i].y1==input[i].y2) continue;
-		
-		int x = abs(input[i].x1-input[i].x2);
-		int y = abs(input[i].y1-input[i].y2);
-		if (x==y){
-			//1,1 --> 3,3
-			if(input[i].x1<input[i].x2 && input[i].y1<input[i].y2){
-				for (int inc=0; inc<=x; inc++)
-					cartesian[input[i].x1+inc][input[i].y1+inc]++;
-				continue;
-			}
-			
-			//3,3 --> 1,1
-			if(input[i].x2<input[i].x1 && input[i].y2<input[i].y1){
-				for (int inc=0; inc<=x; inc++)
-					cartesian[input[i].x2+inc][input[i].y2+inc]++;
-				continue;
-			}
-			
-			//7,9 --> 9,7
-			if(input[i].x1<input[i].x2 && input[i].y2<input[i].y1){
-				for (int inc=0; inc<=x; inc++)
-					cartesian[input[i].x1+inc][input[i].y1-inc]++;
-				continue;
-			}
-			
-			//9,7 --> 7,9
-			if(input[i].x2<input[i].x1 && input[i].y1<input[i].y2){
-				for (int inc=0; inc<=x; inc++)
-					cartesian[input[i].x1-inc][input[i].y1+inc]++;
-				continue;
-			}
-		}
-	}
-}
-
-int countMax(int cartesian[MAX][MAX]){
-	int count=0;
-	for(int i=0; i<MAX; i++)
-		for (int j=0; j<MAX; j++)
-			if(cartesian[i][j]>=2) count++;
-		
-	return count;
-}
 
 int main() {
-   int cartesian[MAX][MAX]={0};
-   struct line input[MAXLINE];
+   int input[MAX]={-1};
    FILE* filePointer;
-   filePointer = fopen("input_day5", "r");
-   readMatrix(filePointer,input);
+   filePointer = fopen("input_day6", "r");
+   int nFisches=readInput(filePointer,input);
    fclose(filePointer); 
-
-   fillMatrixHV(input,cartesian);
-   int output = countMax(cartesian);
-   printf("prima stella: %d\n",output);
    
-   fillMatrixD(input,cartesian);
-   output = countMax(cartesian);
-   //printMatrix(cartesian);
-   printf("seconda stella: %d\n",output);
+   //printInput(input);
+   for (int d=0; d<DAYS; d++)
+   {
+	   printf("%d iter: %d\n",d,nFisches);
+	   countFishes(input,&nFisches);
+   }
+   printf("prima stella: %d\n",nFisches);
+   
+   //printf("seconda stella: %d\n",output);
    return 0;
 }
