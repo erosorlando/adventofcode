@@ -4,8 +4,6 @@
 #define MAX (1000000)
 #define DAYS (80)
 
-int nArray=0;
-
 char* replaceWord(const char* s, const char* oldW,
                   const char* newW)
 {
@@ -68,55 +66,54 @@ int split (const char *txt, char delim, char ***tokens)
     return count;
 }
 
-unsigned long readInput(FILE* filePointer,short input[MAX][MAX]){
+int readInput(FILE* filePointer,int* input){
    int bufferLength = 1000;
    char buffer[bufferLength];
    char **numbers;
    int i=0;
    
    fgets(buffer, bufferLength, filePointer);
-   unsigned long nFisches=split (buffer, ',', &numbers);
+   int nFisches=split (buffer, ',', &numbers);
    for (int i=0; i<nFisches; i++){
-	input[nArray][i]=atoi(numbers[i]);
+	input[i]=atoi(numbers[i]);
    }
    
    return nFisches;
 }
 
-void printInput(short input[MAX][MAX], unsigned long nFisches){
+void printInput(int* input, int nFisches){
 	for (int i=0; i<nFisches; i++){
-		printf("pesce: %d\t",input[nArray][i]);
+		printf("pesce: %d\t",input[i]);
 	}
 }
 
-void countFishes(short input[MAX][MAX],unsigned long* nFisches){
+void countFishes(int* input,int* nFisches){
 	int currentFishes=(*nFisches);
 	for (int i=0; i<currentFishes; i++) {
-		if(input[nArray][i]==-1) break;
-		if(input[nArray][i]==0){
-			input[nArray][i]=6;
-			input[nArray][(*nFisches)++]=8;
+		if(input[i]==-1) break;
+		if(input[i]==0){
+			input[i]=6;
+			input[(*nFisches)++]=8;
 		}
-		else input[nArray][i]--;
+		else input[i]--;
 	}
 }
 
 
 int main() {
-   short input[MAX][MAX]={-1};
-   printf("1");
+   int input[MAX]={-1};
    FILE* filePointer;
    filePointer = fopen("input_day6", "r");
-   unsigned long nFisches=readInput(filePointer,input);
+   int nFisches=readInput(filePointer,input);
    fclose(filePointer); 
    
    //printInput(input);
    for (int d=0; d<DAYS; d++)
    {
-	   printf("%d iter: %lu\n",d,nFisches);
+	   printf("%d iter: %d\n",d,nFisches);
 	   countFishes(input,&nFisches);
    }
-   printf("prima stella: %lu\n",nFisches);
+   printf("prima stella: %d\n",nFisches);
    
    //printf("seconda stella: %d\n",output);
    return 0;
