@@ -1,14 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define MAX (1000000)
-#define DAYS (80)
-
-int nArray=0;
+#define MAX (9)
+#define DAYS (256)
 
 char* replaceWord(const char* s, const char* oldW,
-                  const char* newW)
-{
+                  const char* newW){
     char* result;
     int i, cnt = 0;
     int newWlen = strlen(newW);
@@ -44,8 +41,7 @@ char* replaceWord(const char* s, const char* oldW,
     return result;
 }
 
-int split (const char *txt, char delim, char ***tokens)
-{
+int split (const char *txt, char delim, char ***tokens){
     int *tklen, *t, count = 1;
     char **arr, *p = (char *) txt;
 
@@ -68,7 +64,7 @@ int split (const char *txt, char delim, char ***tokens)
     return count;
 }
 
-unsigned long readInput(FILE* filePointer,short input[MAX][MAX]){
+unsigned long readInput(FILE* filePointer,unsigned long input[2][MAX]){
    int bufferLength = 1000;
    char buffer[bufferLength];
    char **numbers;
@@ -77,44 +73,48 @@ unsigned long readInput(FILE* filePointer,short input[MAX][MAX]){
    fgets(buffer, bufferLength, filePointer);
    unsigned long nFisches=split (buffer, ',', &numbers);
    for (int i=0; i<nFisches; i++){
-	input[nArray][i]=atoi(numbers[i]);
+	  int index=atoi(numbers[i]); 
+	  input[0][index]++;
+	  input[1][index]++;
    }
    
    return nFisches;
 }
 
-void printInput(short input[MAX][MAX], unsigned long nFisches){
-	for (int i=0; i<nFisches; i++){
-		printf("pesce: %d\t",input[nArray][i]);
+void printInput(unsigned long input[2][MAX]){
+	for (int i=0; i<MAX; i++){
+		printf("pesce: %lu\t",input[0][i]);
 	}
+	printf("\n");
 }
 
-void countFishes(short input[MAX][MAX],unsigned long* nFisches){
-	int currentFishes=(*nFisches);
-	for (int i=0; i<currentFishes; i++) {
-		if(input[nArray][i]==-1) break;
-		if(input[nArray][i]==0){
-			input[nArray][i]=6;
-			input[nArray][(*nFisches)++]=8;
+void countFishes(unsigned long input[2][MAX],unsigned long* nFisches){
+	for (int i=MAX-1;i>=0; i--){
+		if(i==0){
+			input[1][6]+=input[0][i];
+			input[1][MAX-1]=input[0][i];
+			(*nFisches)+=input[0][i];
 		}
-		else input[nArray][i]--;
+		else input[1][i-1]=input[0][i];
+	}
+	for (int i=0; i<MAX; i++){
+		input[0][i]=input[1][i];
 	}
 }
 
 
 int main() {
-   short input[MAX][MAX]={-1};
+   unsigned long input[2][MAX]={0};
    printf("1");
    FILE* filePointer;
    filePointer = fopen("input_day6", "r");
    unsigned long nFisches=readInput(filePointer,input);
    fclose(filePointer); 
    
-   //printInput(input);
-   for (int d=0; d<DAYS; d++)
-   {
-	   printf("%d iter: %lu\n",d,nFisches);
+   
+   for (int d=0; d<DAYS; d++){
 	   countFishes(input,&nFisches);
+	   //printInput(input);
    }
    printf("prima stella: %lu\n",nFisches);
    
